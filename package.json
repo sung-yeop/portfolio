@@ -9,6 +9,12 @@
     "lint": "next lint",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "renderer/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix --cache",
+      "prettier --write --cache"
+    ]
+  },
   "dependencies": {
     "next": "15.3.4",
     "react": "^19.0.0",
