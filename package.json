@@ -7,14 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "lint-staged": {
-    "renderer/**/*.{ts,tsx,js,jsx}": [
-      "eslint --fix --cache",
+    "**/*.{ts,tsx,js,jsx,json,css,md}": [
       "prettier --write --cache"
+    ],
+    "**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix --cache"
     ]
   },
   "dependencies": {
@@ -39,6 +43,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "msw": "^2.10.2",
+    "prettier": "^3.6.2",
     "storybook": "^9.0.15",
     "tailwindcss": "^4",
     "typescript": "^5"
