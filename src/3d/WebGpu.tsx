@@ -45,6 +45,17 @@ export default function WebGpu() {
     `
   }
 
+  const triangleVertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5])
+
+  const createVertexBuffer = (device: GPUDevice) => {
+    const buffer = device.createBuffer({
+      size: triangleVertices.byteLength,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+    })
+    device.queue.writeBuffer(buffer, 0, triangleVertices)
+    return buffer
+  }
+
   return (
     <div className='border-amber-200 border rounded-md'>
       <canvas className='w-[1000px]' ref={canvasRef} width={800} height={600} />
