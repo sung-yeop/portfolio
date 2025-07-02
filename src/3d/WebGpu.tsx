@@ -25,6 +25,8 @@ export default function WebGpu() {
       const context = createContext({ ref: canvasRef })
       setContext(context)
       contextConfig({ context, device })
+
+      renderWithParams(adapter, device, context)
     } catch (error) {
       console.error('WebGPU 초기화 실패 : ', error)
     }
@@ -47,7 +49,7 @@ export default function WebGpu() {
     `
   }
 
-  const triangleVertices = new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.0, 0.5])
+  const triangleVertices = new Float32Array([0.0, 0.8, -0.8, -0.8, 0.8, -0.8])
 
   const createVertexBuffer = (device: GPUDevice) => {
     const buffer = device.createBuffer({
@@ -58,7 +60,7 @@ export default function WebGpu() {
     return buffer
   }
 
-  const createRenderPipeline = (device: GPUDevice, buffer: GPUBuffer) => {
+  const createRenderPipeline = (device: GPUDevice) => {
     const vertexModule = device.createShaderModule({
       code: vertexShader(),
     })
@@ -70,11 +72,23 @@ export default function WebGpu() {
       vertex: {
         module: vertexModule,
         entryPoint: 'vs_main',
+        buffers: [
+          {
+            arrayStride: 8,
+            attributes: [
+              {
+                format: 'float32x2',
+                offset: 0,
+                shaderLocation: 0,
+              },
+            ],
+          },
+        ],
       },
       fragment: {
         module: fragmentModule,
         entryPoint: 'fs_main',
-        targets: [{ format: 'bgra8unorm' }],
+        targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }],
       },
       primitive: {
         topology: 'triangle-list',
@@ -83,19 +97,21 @@ export default function WebGpu() {
     })
   }
 
-  const render = () => {
-    if (!adapter || !device || !context) {
-      return null
-    }
+  const renderWithParams = (
+    adapter: GPUAdapter,
+    device: GPUDevice,
+    context: GPUCanvasContext
+  ) => {
+    console.log('Rendering with params:', { adapter, device, context })
 
     const encoder = device.createCommandEncoder()
     const buffer = createVertexBuffer(device)
-    const pipeline = createRenderPipeline(device, buffer)
+    const pipeline = createRenderPipeline(device)
     const renderPass = encoder.beginRenderPass({
       colorAttachments: [
         {
           view: context.getCurrentTexture().createView(),
-          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+          clearValue: { r: 0.2, g: 0.2, b: 0.8, a: 1 },
           loadOp: 'clear',
           storeOp: 'store',
         },
@@ -108,15 +124,26 @@ export default function WebGpu() {
     device.queue.submit([encoder.finish()])
   }
 
+  const render = () => {
+    console.log('Render called:', { adapter, device, context })
+    if (!adapter || !device || !context) {
+      console.error('Missing:', {
+        adapter: !!adapter,
+        device: !!device,
+        context: !!context,
+      })
+      return null
+    }
+    renderWithParams(adapter, device, context)
+  }
+
   useEffect(() => {
-    handleSetting().then(() => {
-      render()
-    })
+    handleSetting()
   }, [])
 
   return (
-    <div className='border-amber-200 border rounded-md bg-white'>
-      <canvas className='w-[1000px]' ref={canvasRef} width={800} height={600} />
+    <div className='border-amber-200 border rounded-md'>
+      <canvas ref={canvasRef} width={800} height={600} />
       {message}
     </div>
   )
