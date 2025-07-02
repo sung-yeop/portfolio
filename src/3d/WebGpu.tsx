@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useWebGpuSetting } from './useWebGpuSetting'
 
 export default function WebGpu() {
@@ -12,21 +12,23 @@ export default function WebGpu() {
     createContext,
     contextConfig,
   } = useWebGpuSetting()
+  const [adapter, setAdapter] = useState<GPUAdapter>()
+  const [device, setDevice] = useState<GPUDevice>()
+  const [context, setContext] = useState<GPUCanvasContext>()
 
   const handleSetting = async () => {
     try {
       const adapter = await requestAdapter()
+      setAdapter(adapter)
       const device = await requestDevice(adapter)
+      setDevice(device)
       const context = createContext({ ref: canvasRef })
+      setContext(context)
       contextConfig({ context, device })
     } catch (error) {
       console.error('WebGPU 초기화 실패 : ', error)
     }
   }
-
-  useEffect(() => {
-    handleSetting()
-  }, [])
 
   const vertexShader = () => {
     return `
@@ -81,8 +83,39 @@ export default function WebGpu() {
     })
   }
 
+  const render = () => {
+    if (!adapter || !device || !context) {
+      return null
+    }
+
+    const encoder = device.createCommandEncoder()
+    const buffer = createVertexBuffer(device)
+    const pipeline = createRenderPipeline(device, buffer)
+    const renderPass = encoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: context.getCurrentTexture().createView(),
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+          loadOp: 'clear',
+          storeOp: 'store',
+        },
+      ],
+    })
+    renderPass.setPipeline(pipeline)
+    renderPass.setVertexBuffer(0, buffer)
+    renderPass.draw(3)
+    renderPass.end()
+    device.queue.submit([encoder.finish()])
+  }
+
+  useEffect(() => {
+    handleSetting().then(() => {
+      render()
+    })
+  }, [])
+
   return (
-    <div className='border-amber-200 border rounded-md'>
+    <div className='border-amber-200 border rounded-md bg-white'>
       <canvas className='w-[1000px]' ref={canvasRef} width={800} height={600} />
       {message}
     </div>
