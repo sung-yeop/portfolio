@@ -33,10 +33,22 @@ export const useWebGpuSetting = () => {
     return ref.current.getContext('webgpu') as GPUCanvasContext
   }
 
+  const contextConfig = ({
+    context,
+    device,
+  }: {
+    context: GPUCanvasContext
+    device: GPUDevice
+  }) => {
+    const format = navigator.gpu.getPreferredCanvasFormat() // 브라우저에서 최적화된 포맷 가져오기
+    context.configure({ device, format, alphaMode: 'opaque' })
+  }
+
   return {
     _message,
     requestAdapter,
     requestDevice,
     createContext,
+    contextConfig,
   }
 }
