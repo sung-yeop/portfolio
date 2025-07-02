@@ -1,11 +1,13 @@
+'use client'
+
 import { RefObject, useState } from 'react'
 
 type Props = {
-  ref: RefObject<HTMLCanvasElement>
+  ref: RefObject<HTMLCanvasElement | null>
 }
 
 export const useWebGpuSetting = () => {
-  const [_message, setMessage] = useState<string>(
+  const [message, setMessage] = useState<string>(
     'WebGPU를 사용할 수 있는 환경인지 확인하는 중입니다.'
   )
 
@@ -13,7 +15,7 @@ export const useWebGpuSetting = () => {
     const adapter = await window.navigator.gpu.requestAdapter()
     if (!adapter) {
       setMessage('WebGPU를 사용할 수 없는 환경입니다.')
-      return
+      throw Error('어뎁더 로딩 실패')
     }
     setMessage('Adapter 불러오기 완료')
     return adapter
@@ -28,7 +30,7 @@ export const useWebGpuSetting = () => {
   const createContext = ({ ref }: Props) => {
     if (!ref.current) {
       setMessage('Canvas 요소를 찾을 수 없습니다.')
-      return null
+      throw new Error('캔버스 요소 찾기 실패')
     }
     return ref.current.getContext('webgpu') as GPUCanvasContext
   }
@@ -45,7 +47,7 @@ export const useWebGpuSetting = () => {
   }
 
   return {
-    _message,
+    message,
     requestAdapter,
     requestDevice,
     createContext,
