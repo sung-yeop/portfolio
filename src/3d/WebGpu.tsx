@@ -56,6 +56,31 @@ export default function WebGpu() {
     return buffer
   }
 
+  const createRenderPipeline = (device: GPUDevice, buffer: GPUBuffer) => {
+    const vertexModule = device.createShaderModule({
+      code: vertexShader(),
+    })
+    const fragmentModule = device.createShaderModule({
+      code: fragmentShader(),
+    })
+
+    return device.createRenderPipeline({
+      vertex: {
+        module: vertexModule,
+        entryPoint: 'vs_main',
+      },
+      fragment: {
+        module: fragmentModule,
+        entryPoint: 'fs_main',
+        targets: [{ format: 'bgra8unorm' }],
+      },
+      primitive: {
+        topology: 'triangle-list',
+      },
+      layout: 'auto',
+    })
+  }
+
   return (
     <div className='border-amber-200 border rounded-md'>
       <canvas className='w-[1000px]' ref={canvasRef} width={800} height={600} />
