@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { RefObject, useState } from 'react'
+
+type Props = {
+  ref: RefObject<HTMLCanvasElement>
+}
 
 export const useWebGpuSetting = () => {
   const [_message, setMessage] = useState<string>(
@@ -17,16 +21,22 @@ export const useWebGpuSetting = () => {
 
   const requestDevice = async (adapter: GPUAdapter) => {
     const device = await adapter.requestDevice()
-    if (!device) {
-      setMessage('Device를 불러올 수 없습니다.')
-    }
     setMessage('WebGPU 초기화 완료')
     return device
+  }
+
+  const createContext = ({ ref }: Props) => {
+    if (!ref.current) {
+      setMessage('Canvas 요소를 찾을 수 없습니다.')
+      return null
+    }
+    return ref.current.getContext('webgpu') as GPUCanvasContext
   }
 
   return {
     _message,
     requestAdapter,
     requestDevice,
+    createContext,
   }
 }
