@@ -42,9 +42,11 @@ export default function WebGpu() {
 
   const fragmentShader = () => {
     return `
+      @group(0) @binding(0) var<uniform> time: f32;
+
       @fragment
       fn fs_main() -> @location(0) vec4f {
-        return vec4f(1.0, 0.0, 0.0, 1.0);
+        return vec4f(sin(time), cos(time), 0.5, 1.0);
       }
     `
   }
