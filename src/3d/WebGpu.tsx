@@ -62,6 +62,32 @@ export default function WebGpu() {
     return buffer
   }
 
+  const createUniformBuffer = (device: GPUDevice) => {
+    const buffer = device.createBuffer({
+      size: 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    })
+    return buffer
+  }
+
+  const createBindGroup = (
+    device: GPUDevice,
+    pipeline: GPURenderPipeline,
+    uniformBuffer: GPUBuffer
+  ) => {
+    return device.createBindGroup({
+      layout: pipeline.getBindGroupLayout(0),
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: uniformBuffer,
+          },
+        },
+      ],
+    })
+  }
+
   const createRenderPipeline = (device: GPUDevice) => {
     const vertexModule = device.createShaderModule({
       code: vertexShader(),
@@ -108,7 +134,9 @@ export default function WebGpu() {
 
     const encoder = device.createCommandEncoder()
     const buffer = createVertexBuffer(device)
+    const uniformBuffer = createUniformBuffer(device)
     const pipeline = createRenderPipeline(device)
+    const bindGroup = createBindGroup(device, pipeline, uniformBuffer)
     const renderPass = encoder.beginRenderPass({
       colorAttachments: [
         {
@@ -120,6 +148,7 @@ export default function WebGpu() {
       ],
     })
     renderPass.setPipeline(pipeline)
+    renderPass.setBindGroup(0, bindGroup)
     renderPass.setVertexBuffer(0, buffer)
     renderPass.draw(3)
     renderPass.end()
