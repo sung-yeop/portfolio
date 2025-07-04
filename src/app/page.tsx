@@ -22,10 +22,8 @@ export default function Home() {
   }, [])
 
   return (
-    <div className='min-h-screen p-8'>
-      <div className='max-w-4xl mx-auto'>
-        <canvas ref={canvasRef} className='w-full h-screen' />
-      </div>
+    <div className='min-h-screen'>
+      <canvas ref={canvasRef} className='w-full h-screen' />
     </div>
   )
 }

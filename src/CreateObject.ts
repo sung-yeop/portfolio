@@ -12,11 +12,8 @@ export class CreateObject {
   }
 
   static createGround() {
-    const groundGeometry = new THREE.PlaneGeometry(2000, 2000)
-    const groundMaterial = new THREE.MeshBasicMaterial({ color: 'green' })
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial)
-    ground.rotation.x = -Math.PI / 2
-    ground.position.y = -10
-    return ground
+    const gridHelper = new THREE.GridHelper(2000, 100, 0x444444, 0x444444)
+    gridHelper.position.y = -10
+    return gridHelper
   }
 }
