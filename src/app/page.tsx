@@ -1,13 +1,12 @@
 'use client'
 
 import { CreateObject } from '@/CreateObject'
-import { useKeyboardListener } from '@/useKeyboardListener'
 import { useThreeSetting } from '@/useThreeSetting'
 import { useEffect } from 'react'
 
 export default function Home() {
-  const { canvasRef, init, start, addMeshToScene } = useThreeSetting()
-  useKeyboardListener()
+  const { canvasRef, init, start, addMeshToScene, addMainCharacterToScene } =
+    useThreeSetting()
 
   useEffect(() => {
     init({
@@ -16,10 +15,8 @@ export default function Home() {
       nearClippingPlane: 0.1,
       farClippingPlane: 1000,
     })
-    const mesh = CreateObject.createMainCharacter()
-    const ground = CreateObject.createGround()
-    addMeshToScene(mesh)
-    addMeshToScene(ground)
+    addMainCharacterToScene(CreateObject.createMainCharacter())
+    addMeshToScene(CreateObject.createGround())
     start()
   }, [])
 

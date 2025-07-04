@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { useKeyboardListener } from './useKeyboardListener'
 
 export const useThreeSetting = () => {
   const threeRef = useRef<{
@@ -12,6 +13,12 @@ export const useThreeSetting = () => {
     controls: OrbitControls
   } | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const keyRefs = useKeyboardListener()
+  const mainCharacterRef = useRef<THREE.Mesh<
+    THREE.SphereGeometry,
+    THREE.MeshBasicMaterial,
+    THREE.Object3DEventMap
+  > | null>(null)
 
   const createScene = () => {
     return new THREE.Scene()
@@ -84,6 +91,24 @@ export const useThreeSetting = () => {
   const start = () => {
     const animate = () => {
       requestAnimationFrame(animate)
+
+      if (!mainCharacterRef.current) {
+        throw new Error('메인 캐릭터가 설정되지 않았습니다!')
+      }
+
+      if (keyRefs.current['ArrowUp'] || keyRefs.current['KeyW']) {
+        mainCharacterRef.current.position.z -= 1
+      }
+      if (keyRefs.current['ArrowDown'] || keyRefs.current['KeyS']) {
+        mainCharacterRef.current.position.z += 1
+      }
+      if (keyRefs.current['ArrowLeft'] || keyRefs.current['KeyA']) {
+        mainCharacterRef.current.position.x -= 1
+      }
+      if (keyRefs.current['ArrowRight'] || keyRefs.current['KeyD']) {
+        mainCharacterRef.current.position.x += 1
+      }
+
       threeRef.current?.controls.update()
       threeRef.current?.renderer.render(
         threeRef.current.scene,
@@ -91,6 +116,17 @@ export const useThreeSetting = () => {
       )
     }
     animate()
+  }
+
+  const addMainCharacterToScene = (
+    mesh: THREE.Mesh<
+      THREE.SphereGeometry,
+      THREE.MeshBasicMaterial,
+      THREE.Object3DEventMap
+    >
+  ) => {
+    mainCharacterRef.current = mesh
+    threeRef.current?.scene.add(mesh)
   }
 
   const addMeshToScene = (
@@ -110,5 +146,6 @@ export const useThreeSetting = () => {
     init,
     start,
     addMeshToScene,
+    addMainCharacterToScene,
   }
 }

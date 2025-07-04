@@ -19,5 +19,7 @@ export const useKeyboardListener = () => {
       window.removeEventListener('keydown', handleKeydown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  })
+  }, [])
+
+  return keysRef
 }
