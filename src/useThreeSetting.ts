@@ -1,14 +1,18 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import * as THREE from 'three'
 
 export const useThreeSetting = () => {
-  const [scene, setScene] = useState<THREE.Scene | null>(null)
+  const threeRef = useRef<{
+    scene: THREE.Scene
+    camera: THREE.PerspectiveCamera
+    renderer: THREE.WebGLRenderer
+  } | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   const createScene = () => {
-    setScene(new THREE.Scene())
+    return new THREE.Scene()
   }
 
   const createCamera = ({
@@ -44,7 +48,7 @@ export const useThreeSetting = () => {
     return renderer
   }
 
-  const createSetting = ({
+  const init = ({
     fov,
     aspectRatio,
     nearClippingPlane,
@@ -55,14 +59,43 @@ export const useThreeSetting = () => {
     nearClippingPlane: number
     farClippingPlane: number
   }) => {
-    createScene()
-    createCamera({ fov, aspectRatio, nearClippingPlane, farClippingPlane })
-    createRenderer()
+    const scene = createScene()
+    const camera = createCamera({
+      fov,
+      aspectRatio,
+      nearClippingPlane,
+      farClippingPlane,
+    })
+    camera.position.z = 30
+    const renderer = createRenderer()
+    threeRef.current = {
+      scene,
+      camera,
+      renderer,
+    }
+  }
+
+  const start = () => {
+    threeRef.current?.renderer.render(
+      threeRef.current.scene,
+      threeRef.current.camera
+    )
+  }
+
+  const addMeshToScene = (
+    mesh: THREE.Mesh<
+      THREE.SphereGeometry | THREE.PlaneGeometry,
+      THREE.MeshBasicMaterial,
+      THREE.Object3DEventMap
+    >
+  ) => {
+    threeRef.current?.scene.add(mesh)
   }
 
   return {
-    scene,
     canvasRef,
-    createSetting,
+    init,
+    start,
+    addMeshToScene,
   }
 }
